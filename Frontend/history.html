@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSmart — History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">💸</span>
+      <span class="logo-text">SpendSmart</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html"><span class="nav-icon">📊</span> Dashboard</a></li>
+      <li><a href="add.html"><span class="nav-icon">➕</span> Add Expense</a></li>
+      <li class="active"><a href="history.html"><span class="nav-icon">📋</span> History</a></li>
+    </ul>
+    <div class="sidebar-footer">Track smarter. Save better.</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">Expense History</h1>
+        <p class="page-sub">All your recorded expenses</p>
+      </div>
+      <a href="add.html" class="btn-primary">+ Add New</a>
+    </div>
+
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Search by category or note..." oninput="filterExpenses()"/>
+      <select id="filterCat" onchange="filterExpenses()">
+        <option value="">All Categories</option>
+        <option>Food</option>
+        <option>Travel</option>
+        <option>Bills</option>
+        <option>Shopping</option>
+        <option>Health</option>
+        <option>Education</option>
+        <option>Entertainment</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="panel full-panel">
+      <div id="historyList"><p class="empty">Loading expenses...</p></div>
+
+      <div class="history-total" id="historyTotal" style="display:none;">
+        <span>Showing Total:</span>
+        <strong id="historyTotalAmt">₹0</strong>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    var allExpenses = [];
+
+    fetch("http://127.0.0.1:5000/expenses")
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        allExpenses = data;
+        renderHistory(allExpenses);
+      });
+
+    function filterExpenses() {
+      var search = document.getElementById("searchInput").value.toLowerCase();
+      var cat    = document.getElementById("filterCat").value;
+      var filtered = allExpenses.filter(function(exp){
+        var matchSearch = exp.category.toLowerCase().includes(search) ||
+                          (exp.note && exp.note.toLowerCase().includes(search));
+        var matchCat = !cat || exp.category === cat;
+        return matchSearch && matchCat;
+      });
+      renderHistory(filtered);
+    }
+
+    function renderHistory(expenses) {
+      var list = document.getElementById("historyList");
+      var totalBox = document.getElementById("historyTotal");
+
+      if (expenses.length === 0) {
+        list.innerHTML = '<p class="empty">No expenses found.</p>';
+        totalBox.style.display = "none";
+        return;
+      }
+
+      var total = 0;
+      var html = '<table class="expense-table"><thead><tr><th>Date</th><th>Category</th><th>Note</th><th>Amount</th><th>Action</th></tr></thead><tbody>';
+      expenses.forEach(function(exp){
+        total += Number(exp.amount);
+        html += '<tr>';
+        html += '<td class="td-date">' + formatDate(exp.date) + '</td>';
+        html += '<td><span class="cat-badge" style="background:' + catColor(exp.category) + '">' + getIcon(exp.category) + ' ' + exp.category + '</span></td>';
+        html += '<td class="td-note">' + (exp.note || '<span style="color:#bbb">—</span>') + '</td>';
+        html += '<td class="td-amount">₹' + Number(exp.amount).toFixed(2) + '</td>';
+        html += '<td><button class="del-btn" onclick="deleteAndRefresh(' + exp.id + ')">Delete</button></td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      list.innerHTML = html;
+
+      document.getElementById("historyTotalAmt").textContent = "₹" + total.toFixed(2);
+      totalBox.style.display = "flex";
+    }
+
+    function deleteAndRefresh(id) {
+      fetch("http://127.0.0.1:5000/expenses/" + id, { method: "DELETE" })
+        .then(function(){ 
+          allExpenses = allExpenses.filter(function(e){ return e.id !== id; });
+          filterExpenses();
+        });
+    }
+
+    function formatDate(d) {
+      if (!d) return "—";
+      var parts = d.split("-");
+      var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      return parts[2] + " " + months[parseInt(parts[1])-1] + " " + parts[0];
+    }
+  </script>
+</body>
+</html>

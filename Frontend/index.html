@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSmart — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- SIDEBAR NAV -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">💸</span>
+      <span class="logo-text">SpendSmart</span>
+    </div>
+    <ul class="nav-links">
+      <li class="active"><a href="index.html"><span class="nav-icon">📊</span> Dashboard</a></li>
+      <li><a href="add.html"><span class="nav-icon">➕</span> Add Expense</a></li>
+      <li><a href="history.html"><span class="nav-icon">📋</span> History</a></li>
+    </ul>
+    <div class="sidebar-footer">Track smarter. Save better.</div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-sub">Your spending overview</p>
+      </div>
+      <a href="add.html" class="btn-primary">+ Add Expense</a>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card card-blue">
+        <p class="stat-label">Total Spent</p>
+        <p class="stat-value" id="totalSpent">₹0</p>
+        <p class="stat-hint">All time</p>
+      </div>
+      <div class="stat-card card-purple">
+        <p class="stat-label">This Month</p>
+        <p class="stat-value" id="monthSpent">₹0</p>
+        <p class="stat-hint" id="monthName">—</p>
+      </div>
+      <div class="stat-card card-orange">
+        <p class="stat-label">Transactions</p>
+        <p class="stat-value" id="txnCount">0</p>
+        <p class="stat-hint">Total entries</p>
+      </div>
+      <div class="stat-card card-green">
+        <p class="stat-label">Top Category</p>
+        <p class="stat-value" id="topCat" style="font-size:1.3rem;">—</p>
+        <p class="stat-hint">Highest spend</p>
+      </div>
+    </div>
+
+    <div class="two-col">
+
+      <div class="panel">
+        <h2 class="panel-title">Category Breakdown</h2>
+        <div id="categoryList"><p class="empty">Loading...</p></div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Recent Expenses</h2>
+        <div id="recentList"><p class="empty">Loading...</p></div>
+        <a href="history.html" class="view-all">View all →</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    loadDashboard();
+  </script>
+</body>
+</html>

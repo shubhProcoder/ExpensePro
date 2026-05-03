@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSmart — Add Expense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">💸</span>
+      <span class="logo-text">SpendSmart</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html"><span class="nav-icon">📊</span> Dashboard</a></li>
+      <li class="active"><a href="add.html"><span class="nav-icon">➕</span> Add Expense</a></li>
+      <li><a href="history.html"><span class="nav-icon">📋</span> History</a></li>
+    </ul>
+    <div class="sidebar-footer">Track smarter. Save better.</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">Add Expense</h1>
+        <p class="page-sub">Record a new spending entry</p>
+      </div>
+    </div>
+
+    <div class="form-wrapper">
+      <div class="form-card">
+
+        <div class="amount-field">
+          <span class="rupee-symbol">₹</span>
+          <input type="number" id="amount" placeholder="0.00" min="1" step="0.01"/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Category</label>
+          <div class="category-pills" id="categoryPills">
+            <button class="pill active" data-cat="Food">🍕 Food</button>
+            <button class="pill" data-cat="Travel">🚌 Travel</button>
+            <button class="pill" data-cat="Bills">💡 Bills</button>
+            <button class="pill" data-cat="Shopping">🛍️ Shopping</button>
+            <button class="pill" data-cat="Health">💊 Health</button>
+            <button class="pill" data-cat="Education">📚 Education</button>
+            <button class="pill" data-cat="Entertainment">🎬 Entertainment</button>
+            <button class="pill" data-cat="Other">📌 Other</button>
+          </div>
+       
+          <input type="text" id="customCategory" placeholder="Or type a custom category..." class="custom-cat-input"/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Note <span class="optional">(optional)</span></label>
+          <input type="text" id="note" placeholder="e.g. Lunch with friends, Electricity bill..."/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Date</label>
+          <input type="date" id="date"/>
+        </div>
+
+        <div id="formMsg" class="form-msg hidden"></div>
+
+        <button class="btn-submit" onclick="submitExpense()">Save Expense</button>
+
+      </div>
+
+      <div class="tips-card">
+        <h3>💡 Quick Tips</h3>
+        <ul>
+          <li>Use the category pills to quickly tag your expense.</li>
+          <li>Add a short note to remember what it was for.</li>
+          <li>Check the Dashboard to see your spending patterns.</li>
+          <li>View full history on the History page.</li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    document.getElementById("date").valueAsDate = new Date();
+
+    var selectedCat = "Food";
+    document.querySelectorAll(".pill").forEach(function(pill) {
+      pill.addEventListener("click", function() {
+        document.querySelectorAll(".pill").forEach(function(p){ p.classList.remove("active"); });
+        pill.classList.add("active");
+        selectedCat = pill.dataset.cat;
+        document.getElementById("customCategory").value = ""; // clear custom
+      });
+    });
+
+    function submitExpense() {
+      var amount   = document.getElementById("amount").value.trim();
+      var custom   = document.getElementById("customCategory").value.trim();
+      var category = custom || selectedCat;
+      var note     = document.getElementById("note").value.trim();
+      var date     = document.getElementById("date").value;
+      var msgBox   = document.getElementById("formMsg");
+
+      if (!amount || !date) {
+        showMsg("Please enter an amount and date.", "error");
+        return;
+      }
+
+      fetch("http://127.0.0.1:5000/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: amount, category: category, note: note, date: date })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        showMsg("✅ Expense saved successfully!", "success");
+        document.getElementById("amount").value = "";
+        document.getElementById("note").value   = "";
+        document.getElementById("customCategory").value = "";
+      })
+      .catch(function(err){ showMsg("❌ Error saving. Is Flask running?", "error"); });
+    }
+
+    function showMsg(text, type) {
+      var box = document.getElementById("formMsg");
+      box.textContent = text;
+      box.className = "form-msg " + type;
+      setTimeout(function(){ box.className = "form-msg hidden"; }, 3000);
+    }
+  </script>
+</body>
+</html>
